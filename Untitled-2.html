@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Killifish — Promemoria & Classificatore</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg1: #0a1929;
+      --bg2: #102a43;
+      --card: rgba(255, 255, 255, 0.07);
+      --card-hover: rgba(255, 255, 255, 0.1);
+      --accent: #1a73e8;
+      --accent-hover: #1967d2;
+      --muted: #89b6d3;
+      --text: #e3f2fd;
+      --success: #4caf50;
+      --warning: #ff9800;
+      --error: #f44336;
+      --border: rgba(255, 255, 255, 0.12);
+      --shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+    
+    * {
+      box-sizing: border-box;
+      transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+    }
+    
+    body {
+      margin: 0;
+      font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      background: linear-gradient(135deg, var(--bg1) 0%, var(--bg2) 100%);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+    
+    .wrap {
+      max-width: 1200px;
+      margin: 32px auto;
+      padding: 20px;
+    }
+    
+    header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+      padding: 16px 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+    }
+    
+    header img {
+      filter: drop-shadow(0 0 10px rgba(26, 115, 232, 0.4));
+      max-height: 60px;
+    }
+    
+    h1 {
+      margin: 0;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: -0.02em;
+    }
+    
+    h2, h3, h4 {
+      color: #ffffff;
+      font-weight: 600;
+      margin-top: 0;
+    }
+    
+    h3 {
+      font-size: 1.2rem;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    nav.tabs {
+      margin-left: auto;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 12px;
+      padding: 4px;
+    }
+    
+    .tabs {
+      display: flex;
+      gap: 4px;
+    }
+    
+    .tab {
+      background: transparent;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 10px;
+      color: var(--muted);
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+    
+    .tab:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+    }
+    
+    .tab.active {
+      background: var(--accent);
+      color: white;
+      box-shadow: 0 4px 12px rgba(26, 115, 232, 0.3);
+    }
+    
+    .panel {
+      margin-top: 24px;
+    }
+    
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 440px;
+      gap: 24px;
+    }
+    
+    .card {
+      background: var(--card);
+      padding: 20px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+    
+    .card:hover {
+      background: var(--card-hover);
+    }
+    
+    label {
+      display: block;
+      margin-top: 16px;
+      margin-bottom: 6px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #c7e2f8;
+    }
+    
+    input, select, button, textarea {
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      outline: none;
+      font-family: inherit;
+      font-size: 0.95rem;
+      background: rgba(0, 0, 0, 0.2);
+      color: var(--text);
+    }
+    
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+    }
+    
+    input[type=date], input[type=number], input[type=text] {
+      width: 100%;
+    }
+    
+    small.muted {
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+    
+    .result {
+      background: rgba(0, 0, 0, 0.2);
+      padding: 16px;
+      border-radius: 12px;
+      margin-top: 16px;
+      border: 1px solid var(--border);
+    }
+    
+    .row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    
+    .thumb {
+      width: 84px;
+      height: 84px;
+      object-fit: cover;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      transition: transform 0.2s ease;
+    }
+    
+    .thumb:hover {
+      transform: scale(1.05);
+    }
+    
+    button {
+      cursor: pointer;
+      font-weight: 500;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 12px;
+      transition: all 0.2s ease;
+    }
+    
+    button.primary {
+      background: var(--accent);
+      color: white;
+      box-shadow: 0 4px 12px rgba(26, 115, 232, 0.3);
+    }
+    
+    button.primary:hover {
+      background: var(--accent-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(26, 115, 232, 0.4);
+    }
+    
+    button.secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    
+    button.secondary:hover {
+      background: rgba(255, 255, 255, 0.15);
+      transform: translateY(-2px);
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+    }
+    
+    th, td {
+      border-bottom: 1px solid var(--border);
+      padding: 10px 12px;
+      text-align: left;
+    }
+    
+    th {
+      font-weight: 600;
+      color: #c7e2f8;
+      font-size: 0.9rem;
+    }
+    
+    tr:last-child td {
+      border-bottom: none;
+    }
+    
+    tr:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+    
+    .dropzone {
+      border: 2px dashed var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      text-align: center;
+      background: rgba(0, 0, 0, 0.15);
+      cursor: pointer;
+    }
+    
+    .dropzone:hover {
+      border-color: var(--accent);
+      background: rgba(0, 0, 0, 0.2);
+    }
+    
+    .dropzone.drag {
+      background: rgba(26, 115, 232, 0.1);
+      border-color: var(--accent);
+      transform: scale(1.01);
+    }
+    
+    footer {
+      margin-top: 40px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.9rem;
+      padding: 16px;
+      border-top: 1px solid var(--border);
+    }
+    
+    /* Badges e indicatori */
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      margin-left: 8px;
+    }
+    
+    .badge-success {
+      background: rgba(76, 175, 80, 0.2);
+      color: #4caf50;
+    }
+    
+    .badge-warning {
+      background: rgba(255, 152, 0, 0.2);
+      color: #ff9800;
+    }
+    
+    .badge-error {
+      background: rgba(244, 67, 54, 0.2);
+      color: #f44336;
+    }
+    
+    /* Animazioni */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .card, .tab, button {
+      animation: fadeIn 0.3s ease-out;
+    }
+    
+    /* Responsive */
+    @media (max-width: 1000px) {
+      .grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+      
+      header {
+        flex-direction: column;
+        text-align: center;
+        gap: 12px;
+      }
+      
+      nav.tabs {
+        margin-left: 0;
+        width: 100%;
+      }
+      
+      .tabs {
+        justify-content: center;
+      }
+    }
+    
+    @media (max-width: 600px) {
+      .wrap {
+        padding: 16px;
+        margin: 16px auto;
+      }
+      
+      .tabs {
+        flex-direction: column;
+      }
+      
+      .row {
+        flex-direction: column;
+        gap: 10px;
+      }
+      
+      button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <!-- Logo AIK -->
+      <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIHZpZXdCb3g9IjAgMCA0OCA0OCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiByeD0iOCIgZmlsbD0iIzFBNzNFOCIvPgo8dGV4dCB4PSI1MCUiIHk9IjUwJSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0id2hpdGUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMCIgZm9udC13ZWlnaHQ9ImJvbGQiPkFJSzwvdGV4dD4KPC9zdmc+" alt="AIK Logo" width="48" height="48">
+      <div>
+        <h1>Killifish — Promemoria & Classificatore</h1>
+        <small class="muted">Dati salvati nel tuo browser</small>
+      </div>
+      <nav class="tabs">
+        <div class="tab active" data-tab="reminder">📅 Promemoria</div>
+        <div class="tab" data-tab="classifier">🧪 Riconoscimento Uova</div>
+        <div class="tab" data-tab="db">📁 DB Specie</div>
+      </nav>
+    </header>
+
+    <main class="panel">
+      <!-- PROMEMORIA -->
+      <section id="reminder" class="card">
+        <div class="grid">
+          <div>
+            <label>Specie (autocomplete)</label>
+            <input id="specieInput" list="specieList" placeholder="Scrivi il nome della specie...">
+            <datalist id="specieList"></datalist>
+
+            <label>Data deposizione</label>
+            <input id="depoDate" type="date">
+
+            <label>Temperatura reale incubazione (°C)</label>
+            <input id="tempInput" type="number" value="25" step="0.1">
+
+            <label>Q10 (fattore biologico)</label>
+            <input id="q10Input" type="number" value="2" step="0.1">
+
+            <div style="margin-top:16px" class="row">
+              <button class="primary" id="calcBtn">Calcola & Salva</button>
+              <button class="secondary" id="clearSaved">Pulisci lista</button>
+            </div>
+
+            <div id="remOutput" class="result"></div>
+          </div>
+
+          <div>
+            <div class="card" style="padding:16px;margin-bottom:16px">
+              <strong>Promemoria salvati</strong>
+              <table style="margin-top:12px" id="savedTable">
+                <thead><tr><th>Specie</th><th>Metà</th><th>Schiusa</th><th>Azioni</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- RICONOSCIMENTO UOVA -->
+      <section id="classifier" class="card" style="display:none;margin-top:20px">
+        <div class="grid">
+          <div>
+            <h3>1) Addestra il riconoscitore</h3>
+            <div class="dropzone" id="dzReady">Trascina qui immagini <b>PRONTE</b> (max 10) o clicca per scegliere</div>
+            <input id="inReady" type="file" multiple accept="image/*" style="display:none">
+            <div id="thumbReady" class="row" style="margin-top:12px"></div>
+
+            <div style="height:12px"></div>
+            <div class="dropzone" id="dzNot">Trascina qui immagini <b>NON PRONTE</b> (max 10) o clicca per scegliere</div>
+            <input id="inNot" type="file" multiple accept="image/*" style="display:none">
+            <div id="thumbNot" class="row" style="margin-top:12px"></div>
+
+            <div class="row" style="margin-top:16px">
+              <button id="btnTrain" class="primary">Allena Modello</button>
+              <button id="btnClearExamples" class="secondary">Pulisci Esempi</button>
+            </div>
+
+            <div id="trainStatus" class="result" style="display:none"></div>
+          </div>
+
+          <div>
+            <h3>2) Classifica un'immagine</h3>
+            <div class="dropzone" id="dzTest">Trascina qui una foto da classificare oppure clicca</div>
+            <input id="inTest" type="file" accept="image/*" style="display:none">
+            <div id="testThumbs" class="row" style="margin-top:12px"></div>
+
+            <div id="predOut" class="result" style="display:none;margin-top:12px"></div>
+
+            <div style="margin-top:16px" class="result">
+              <strong>Consigli pratici</strong>
+              <ul style="margin:10px 0 0 20px;color:#cfeffb">
+                <li>Fotografa con luce e ingrandimento costanti</li>
+                <li>Verifica manualmente (occhi pigmentati? movimento?)</li>
+                <li>Modello di supporto, non diagnostico</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- DB SPECIE -->
+      <section id="db" class="card" style="display:none;margin-top:20px">
+        <h3>DB Specie</h3>
+        
+        <div class="card" style="padding:16px;margin-bottom:16px">
+          <strong>Carica DB da Excel</strong><br>
+          <small class="muted">Formato: prima colonna = genere, seconda colonna = specie, terza colonna = settimane</small>
+          
+          <div style="margin-top:16px" class="row">
+            <input id="fileExcel" type="file" accept=".xlsx,.xls,.csv" style="flex:1">
+            <button class="primary" id="loadExcelBtn">Carica Excel</button>
+          </div>
+          
+          <div id="excelStatus" class="result" style="margin-top:12px;display:none"></div>
+        </div>
+
+        <div class="card" style="padding:16px">
+          <strong>DB Attuale</strong>
+          <div style="margin-top:12px" class="row">
+            <button class="secondary" id="clearDBBtn">Pulisci DB</button>
+            <button class="secondary" id="addExampleBtn">Aggiungi Esempio</button>
+          </div>
+          <div id="dbPreview" class="result" style="margin-top:12px;max-height:300px;overflow:auto"></div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      Applicazione locale per killifish - Google Calendar e riconoscimento uova incluso
+    </footer>
+  </div>
+
+  <!-- Librerie -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.18.0/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier@1.2.2"></script>
+
+  <script>
+    // ================== UTIL COMUNI ==================
+    const $ = sel => document.querySelector(sel);
+    function formatYMD(d){ return d.toISOString().split('T')[0]; }
+    function q10Factor(Tref, Tactual, Q10){ return Math.pow(Q10, (Tref - Tactual)/10); }
+
+    // Tabs
+    document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click', ()=>{
+      document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+      t.classList.add('active');
+      const tab = t.dataset.tab;
+      $('#reminder').style.display = (tab==='reminder')?'block':'none';
+      $('#classifier').style.display = (tab==='classifier')?'block':'none';
+      $('#db').style.display = (tab==='db')?'block':'none';
+    }));
+
+    // ================== DB SPECIE ==================
+    let DB = [];
+
+    function refreshAutocomplete(){
+      const list = $('#specieList'); 
+      list.innerHTML = '';
+      
+      DB.forEach(item=>{ 
+        const opt = document.createElement('option'); 
+        opt.value = item.specie; 
+        list.appendChild(opt); 
+      });
+      
+      updateDBPreview();
+    }
+
+    function updateDBPreview(){
+      const preview = $('#dbPreview');
+      if (DB.length === 0) {
+        preview.innerHTML = '<em>Nessun dato nel DB</em>';
+        return;
+      }
+      
+      let html = '<table style="width:100%"><tr><th>Specie</th><th>Settimane</th></tr>';
+      DB.forEach(item => {
+        html += `<tr><td>${item.specie}</td><td>${item.settimane}</td></tr>`;
+      });
+      html += '</table>';
+      preview.innerHTML = html;
+    }
+
+    function loadDBFromStorage() {
+      try {
+        const savedDB = localStorage.getItem('kf_db');
+        if (savedDB) {
+          DB = JSON.parse(savedDB);
+          refreshAutocomplete();
+        }
+      } catch(e) {
+        console.log('Nessun DB salvato');
+      }
+    }
+
+    function saveDBToStorage() {
+      localStorage.setItem('kf_db', JSON.stringify(DB));
+    }
+
+    // CARICAMENTO EXCEL
+    $('#loadExcelBtn').addEventListener('click', function() {
+      const fileInput = $('#fileExcel');
+      const file = fileInput.files[0];
+      
+      if (!file) {
+        alert('Seleziona prima un file Excel!');
+        return;
+      }
+
+      const status = $('#excelStatus');
+      status.style.display = 'block';
+      status.innerHTML = 'Caricamento in corso...';
+
+      const reader = new FileReader();
+      
+      reader.onload = function(e) {
+        try {
+          const data = e.target.result;
+          const workbook = XLSX.read(data, {type: 'binary'});
+          const sheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[sheetName];
+          
+          const jsonData = XLSX.utils.sheet_to_json(worksheet, {header: 1});
+          const newDB = [];
+
+          for(let i = 0; i < jsonData.length; i++) {
+            const row = jsonData[i];
+            // Verifica che ci siano almeno 3 colonne e che non siano righe vuote
+            if (row && row.length >= 3 && row[0] && row[1] && row[2]) {
+              const genere = String(row[0] || '').trim();
+              const specie = String(row[1] || '').trim();
+              const settimaneStr = String(row[2] || '').trim();
+              
+              if (genere && specie && settimaneStr) {
+                // Combina genere e specie
+                const nomeSpecie = `${genere} ${specie}`;
+                
+                // Estrai il numero dalle settimane
+                const numeroMatch = settimaneStr.match(/(\d+\.?\d*)/);
+                if (numeroMatch) {
+                  const settimane = parseFloat(numeroMatch[1]);
+                  if (!isNaN(settimane) && settimane > 0) {
+                    newDB.push({specie: nomeSpecie, settimane});
+                  }
+                }
+              }
+            }
+          }
+
+          if (newDB.length > 0) {
+            DB = newDB;
+            saveDBToStorage();
+            refreshAutocomplete();
+            status.innerHTML = `✅ DB caricato: ${DB.length} specie`;
+          } else {
+            status.innerHTML = '❌ Nessun dato valido trovato nel file';
+          }
+
+        } catch(err) {
+          status.innerHTML = '❌ Errore: ' + err.message;
+          console.error('Errore:', err);
+        }
+      };
+
+      reader.onerror = function() {
+        status.innerHTML = '❌ Errore nella lettura del file';
+      };
+
+      reader.readAsBinaryString(file);
+    });
+
+    // PULSANTI DB
+    $('#clearDBBtn').addEventListener('click', function() {
+      if (confirm('Vuoi cancellare tutto il DB?')) {
+        DB = [];
+        saveDBToStorage();
+        refreshAutocomplete();
+        $('#excelStatus').innerHTML = 'DB cancellato';
+      }
+    });
+
+    $('#addExampleBtn').addEventListener('click', function() {
+      DB = [
+        {specie: "Nothobranchius furzeri", settimane: 12},
+        {specie: "Aphyosemion australe", settimane: 8},
+        {specie: "Fundulopanchax gardneri", settimane: 10},
+        {specie: "Aphyosemion striatum", settimane: 9},
+        {specie: "Nothobranchius rachovii", settimane: 14}
+      ];
+      saveDBToStorage();
+      refreshAutocomplete();
+      $('#excelStatus').innerHTML = 'Dati esempio caricati';
+    });
+
+    // ================== PROMEMORIA ==================
+    function loadSaved(){ 
+      try{ 
+        return JSON.parse(localStorage.getItem('kf_reminders')||'[]'); 
+      } catch(e){ 
+        return [] 
+      } 
+    }
+
+    function saveSaved(arr){ 
+      localStorage.setItem('kf_reminders', JSON.stringify(arr)); 
+    }
+
+    function makeGCalLink(date, title, description) {
+      const start = formatYMD(date).replace(/-/g, '');
+      return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${start}/${start}&details=${encodeURIComponent(description)}&location=&sf=true&output=xml`;
+    }
+
+    function renderSaved(){
+      const tbody = $('#savedTable tbody'); 
+      tbody.innerHTML='';
+      const arr = loadSaved();
+      
+      if(!arr.length){ 
+        const tr=document.createElement('tr'); 
+        tr.innerHTML='<td colspan=4><em>Nessun promemoria salvato</em></td>'; 
+        tbody.appendChild(tr); 
+        return; 
+      }
+      
+      arr.forEach((r,i)=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${r.specie}</td>
+          <td>${r.mid}</td>
+          <td>${r.end}</td>
+          <td>
+            <button data-act="gcal-mid" data-i="${i}" title="Aggiungi a Google Calendar">📅 Metà</button>
+            <button data-act="gcal-end" data-i="${i}" title="Aggiungi a Google Calendar">📅 Schiusa</button>
+            <button data-act="del" data-i="${i}" class="secondary">Elimina</button>
+          </td>`;
+        tbody.appendChild(tr);
+      });
+      
+      tbody.querySelectorAll('button').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const i = Number(btn.dataset.i); 
+          const act = btn.dataset.act; 
+          const arr = loadSaved(); 
+          const item = arr[i]; 
+          
+          if(act==='del'){ 
+            arr.splice(i,1); 
+            saveSaved(arr); 
+            renderSaved(); 
+          }
+          else if(act==='gcal-mid'){ 
+            const midDate = new Date(item.mid);
+            const title = `Controllo uova - ${item.specie}`;
+            window.open(makeGCalLink(midDate, title, item.desc), '_blank');
+          }
+          else if(act==='gcal-end'){ 
+            const endDate = new Date(item.end);
+            const title = `Schiusa stimata - ${item.specie}`;
+            window.open(makeGCalLink(endDate, title, item.desc), '_blank');
+          }
+        });
+      });
+    }
+
+    $('#clearSaved').addEventListener('click', ()=>{ 
+      if(confirm('Rimuovere tutti i promemoria?')){ 
+        localStorage.removeItem('kf_reminders'); 
+        renderSaved(); 
+      } 
+    });
+
+    $('#calcBtn').addEventListener('click', ()=>{
+      const specieName = $('#specieInput').value.trim();
+      const depo = $('#depoDate').value; 
+      const Tactual = Number($('#tempInput').value);
+      const Q10 = Number($('#q10Input').value)||2; 
+      const Tref = 25;
+      
+      if(!specieName) return alert('Inserisci specie');
+      if(!depo) return alert('Inserisci data deposizione');
+      
+      const rec = DB.find(x=>x.specie.toLowerCase()===specieName.toLowerCase());
+      if(!rec) return alert('Specie non presente nel DB. Carica il DB prima.');
+      
+      const settimaneRef = Number(rec.settimane);
+      const factor = q10Factor(Tref, Tactual, Q10);
+      const settimaneAdj = settimaneRef * factor;
+      const start = new Date(depo);
+      const daysTotal = Math.max(1, Math.round(settimaneAdj * 7));
+      const daysHalf = Math.max(1, Math.round(daysTotal/2));
+      const mid = new Date(start); mid.setDate(start.getDate()+daysHalf);
+      const end = new Date(start); end.setDate(start.getDate()+daysTotal);
+
+      const descr = `Specie: ${specieName}\nDeposizione: ${formatYMD(start)}\nSettimane ref: ${settimaneRef} (a 25°C)\nSettimane adj: ${settimaneAdj.toFixed(1)} a ${Tactual}°C (Q10=${Q10})`;
+      
+      $('#remOutput').innerHTML = `
+        <strong>${specieName}</strong><br>
+        Tempo stimato: <b>${settimaneAdj.toFixed(1)} settimane</b><br>
+        Metà incubazione: <b>${formatYMD(mid)}</b><br>
+        Schiusa stimata: <b>${formatYMD(end)}</b>
+        <div style="margin-top:12px" class="row">
+          <button class="secondary" onclick="window.open('${makeGCalLink(mid, 'Controllo uova - ' + specieName, descr)}', '_blank')">📅 Aggiungi Metà a Google Calendar</button>
+          <button class="secondary" onclick="window.open('${makeGCalLink(end, 'Schiusa stimata - ' + specieName, descr)}', '_blank')">📅 Aggiungi Schiusa a Google Calendar</button>
+        </div>
+      `;
+
+      const arr = loadSaved();
+      arr.push({
+        specie: specieName, 
+        mid: formatYMD(mid), 
+        end: formatYMD(end), 
+        desc: descr
+      });
+      saveSaved(arr); 
+      renderSaved();
+    });
+
+    // ================== RICONOSCIMENTO UOVA ==================
+    let net, classifier = knnClassifier.create();
+    let isModelReady = false;
+    let isClassifierTrained = false;
+
+    // Setup drag and drop
+    function setupDropzone(dz, input) {
+      dz.addEventListener('click', () => input.click());
+      dz.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dz.classList.add('drag');
+      });
+      dz.addEventListener('dragleave', () => dz.classList.remove('drag'));
+      dz.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dz.classList.remove('drag');
+        input.files = e.dataTransfer.files;
+        input.dispatchEvent(new Event('change'));
+      });
+    }
+
+    setupDropzone($('#dzReady'), $('#inReady'));
+    setupDropzone($('#dzNot'), $('#inNot'));
+    setupDropzone($('#dzTest'), $('#inTest'));
+
+    // Mostra anteprime
+    function showThumbs(input, container) {
+      container.innerHTML = '';
+      Array.from(input.files).forEach(file => {
+        const url = URL.createObjectURL(file);
+        const img = document.createElement('img');
+        img.src = url;
+        img.className = 'thumb';
+        container.appendChild(img);
+      });
+    }
+
+    $('#inReady').addEventListener('change', () => showThumbs($('#inReady'), $('#thumbReady')));
+    $('#inNot').addEventListener('change', () => showThumbs($('#inNot'), $('#thumbNot')));
+    $('#inTest').addEventListener('change', () => showThumbs($('#inTest'), $('#testThumbs')));
+
+    // Carica modello
+    async function loadModel() {
+      if (net) return;
+      $('#trainStatus').style.display = 'block';
+      $('#trainStatus').textContent = 'Caricamento modello...';
+      try {
+        net = await mobilenet.load({version: 2, alpha: 1.0});
+        isModelReady = true;
+        $('#trainStatus').textContent = 'Modello pronto!';
+      } catch (e) {
+        $('#trainStatus').textContent = 'Errore caricamento modello';
+      }
+    }
+
+    // Addestra modello
+    $('#btnTrain').addEventListener('click', async () => {
+      await loadModel();
+      if (!net) return;
+
+      $('#trainStatus').style.display = 'block';
+      $('#trainStatus').textContent = 'Addestramento in corso...';
+
+      classifier.clearAllClasses();
+      const readyFiles = Array.from($('#inReady').files);
+      const notFiles = Array.from($('#inNot').files);
+
+      if (readyFiles.length === 0 && notFiles.length === 0) {
+        $('#trainStatus').textContent = 'Aggiungi esempi prima di addestrare';
+        return;
+      }
+
+      // Funzione per processare un'immagine
+      async function processImage(file, label) {
+        return new Promise((resolve) => {
+          const img = new Image();
+          img.onload = async () => {
+            try {
+              const logits = net.infer(img, true);
+              classifier.addExample(logits, label);
+              resolve();
+            } catch (e) {
+              resolve();
+            }
+          };
+          img.src = URL.createObjectURL(file);
+        });
+      }
+
+      // Processa immagini PRONTE
+      for (const file of readyFiles) {
+        await processImage(file, 'PRONTA');
+      }
+
+      // Processa immagini NON PRONTE
+      for (const file of notFiles) {
+        await processImage(file, 'NON_PRONTA');
+      }
+
+      isClassifierTrained = true;
+      $('#trainStatus').textContent = `Addestramento completato! Pronte: ${readyFiles.length}, Non pronte: ${notFiles.length}`;
+    });
+
+    // Classifica immagine
+    $('#inTest').addEventListener('change', async () => {
+      if (!isModelReady) await loadModel();
+      if (!isClassifierTrained) {
+        $('#predOut').style.display = 'block';
+        $('#predOut').innerHTML = 'Addestra prima il modello con esempi!';
+        return;
+      }
+
+      const file = $('#inTest').files[0];
+      if (!file) return;
+
+      $('#predOut').style.display = 'block';
+      $('#predOut').textContent = 'Classificazione in corso...';
+
+      const img = new Image();
+      img.onload = async () => {
+        try {
+          const logits = net.infer(img, true);
+          const result = await classifier.predictClass(logits);
+          
+          const confidence = result.confidences[result.label] || 0;
+          let message = '';
+          
+          if (confidence < 0.6) {
+            message = `⚪ INCERTO (${Math.round(confidence * 100)}% confidenza)`;
+          } else if (result.label === 'PRONTA') {
+            message = `🟢 PRONTA (${Math.round(confidence * 100)}% confidenza)`;
+          } else {
+            message = `🔴 NON PRONTA (${Math.round(confidence * 100)}% confidenza)`;
+          }
+          
+          $('#predOut').innerHTML = `<strong>Risultato:</strong> ${message}`;
+        } catch (e) {
+          $('#predOut').textContent = 'Errore nella classificazione';
+        }
+      };
+      img.src = URL.createObjectURL(file);
+    });
+
+    // Pulisci esempi
+    $('#btnClearExamples').addEventListener('click', () => {
+      $('#inReady').value = '';
+      $('#inNot').value = '';
+      $('#inTest').value = '';
+      $('#thumbReady').innerHTML = '';
+      $('#thumbNot').innerHTML = '';
+      $('#testThumbs').innerHTML = '';
+      $('#predOut').style.display = 'none';
+      $('#trainStatus').style.display = 'none';
+      classifier.clearAllClasses();
+      isClassifierTrained = false;
+    });
+
+    // ================== INIZIALIZZAZIONE ==================
+    loadDBFromStorage();
+    renderSaved();
+    $('#depoDate').value = formatYMD(new Date());
+    
+    // Pre-carica il modello
+    loadModel();
+  </script>
+</body>
+</html>
